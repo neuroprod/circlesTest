@@ -1,5 +1,7 @@
 import Shader from "./lib/core/Shader.ts";
 import {ShaderType} from "./lib/core/ShaderTypes.ts";
+import DefaultTextures from "./lib/textures/DefaultTextures.ts";
+import {TextureDimension} from "./lib/WebGPUConstants.ts";
 
 
 
@@ -13,12 +15,14 @@ export default class CircleShader extends Shader{
             this.addAttribute("aPosPrev", ShaderType.vec2);
             this.addAttribute("aPosNext", ShaderType.vec2);
             this.addAttribute("aDir", ShaderType.vec2);
+            this.addAttribute("aInstancePos", ShaderType.vec2,1,"instance");
         }
         //this.renderer.texturesByLabel["GDepth"]
         this.addUniform("ratio",1)
         this.addUniform("thickness",0.01)
+        this.addTexture("offsetTexture",DefaultTextures.getWhite(this.renderer),"float",TextureDimension.TwoD,GPUShaderStage.VERTEX)
 
-        this.logShaderCode =true;
+
     }
     getShaderCode(): string {
         return /* wgsl */ `
@@ -34,15 +38,24 @@ struct VertexOutput
 
 
 ${this.getShaderUniforms(0)}
+fn getPos( pos: vec2f,inst:vec2f,dir:vec2f,indexOff:f32)->vec2f
+{
+    var posR =pos;
+    let p = vec2f(inst.x,dir.y+indexOff);
 
+        let uvPos = vec2<i32>(p);
+   posR*= 0.6+ (textureLoad(offsetTexture,  uvPos ,0).x)*0.7 ;
+    posR.x +=inst.x/10000;
+    return  posR*vec2(uniforms.ratio,1.0);
+}
 @vertex
 fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
 {
     var output : VertexOutput;
     
-    var posS=aPos*vec2(uniforms.ratio,1.0);
-    var posSNext =aPosNext*vec2(uniforms.ratio,1.0);
-     var posSPrev =aPosPrev*vec2(uniforms.ratio,1.0);
+    var posS=getPos(aPos,aInstancePos,aDir,0.0);
+    var posSNext =getPos(aPosNext,aInstancePos,aDir,1.0);
+     var posSPrev =getPos(aPosPrev,aInstancePos,aDir,-1.0);
     let dir = (posSNext-posS) +    (posS-posSPrev);
     let normal =normalize(vec2(-dir.y,dir.x));
     
@@ -58,7 +71,7 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
 fn mainFragment() ->   @location(0) vec4f
 {
  
-  return vec4f(vec3(1.0),1.0);
+  return vec4f(vec3(1.0,0.5,0.5),1.0);
  
 }
 ///////////////////////////////////////////////////////////

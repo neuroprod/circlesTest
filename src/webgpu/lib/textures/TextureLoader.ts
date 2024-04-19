@@ -6,9 +6,9 @@ export default class TextureLoader extends Texture {
     public loaded: boolean=false;
 
     onComplete=()=>{}
-    constructor(renderer: Renderer, preLoader, url: string = "", options: Partial<TextureOptions>,delay=0) {
+    constructor(renderer: Renderer, url: string = "", options: Partial<TextureOptions>,delay=0) {
         super(renderer, url, options)
-        preLoader.startLoad();
+
         this.options.usage = GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
        if(url.includes("_Op."))
        this.options.format = TextureFormat.R8Unorm
@@ -18,7 +18,7 @@ export default class TextureLoader extends Texture {
         setTimeout(()=>{
 
     this.loadURL(url).then(() => {
-        preLoader.stopLoad();
+
         this.onComplete();
     });
 },delay)

@@ -42,6 +42,7 @@ export default class Material extends ObjectGPU {
             let s: GPUColorTargetState = {format: a.renderTexture.options.format}
             if (this.blendModes) {
                 s.blend = this.blendModes[count];
+
             }
             count++
             this.colorTargets.push(s);
@@ -93,6 +94,7 @@ export default class Material extends ObjectGPU {
                 targets: this.colorTargets,
             }
         }
+
         return desc;
     }
 
