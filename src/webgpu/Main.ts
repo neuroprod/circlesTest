@@ -4,10 +4,9 @@ import UI from "./lib/UI/UI.ts";
 import CanvasRenderPass from "./CanvasRenderPass.ts";
 import Camera from "./lib/Camera.ts";
 import Model from "./lib/model/Model.ts";
-import Sphere from "./lib/mesh/Sphere.ts";
+
 import Material from "./lib/core/Material.ts";
-import ParticleShader from "./ParticleShader.ts";
-import Compute from "./Compute.ts";
+
 import Timer from "./lib/Timer.ts";
 import CircleMesh from "./CircleMesh.ts";
 import CircleShader from "./CircleShader.ts";
