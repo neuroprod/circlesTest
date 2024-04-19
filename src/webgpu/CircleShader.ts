@@ -30,7 +30,7 @@ export default class CircleShader extends Shader{
 struct VertexOutput
 {
 
-
+     @location(0) l : vec2f,
     @builtin(position) position : vec4f
   
 }
@@ -62,16 +62,16 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
     
     let pos =  posS+normal*uniforms.thickness*aDir.x;
     output.position =vec4(pos.x,pos.y,0,1.0);
-  
+  output.l = aDir;
     return output;
 }
 
 
 @fragment
-fn mainFragment() ->   @location(0) vec4f
+fn mainFragment(@location(0) l: vec2f) ->   @location(0) vec4f
 {
  
-  return vec4f(vec3(1.0,0.5,0.5),1.0);
+  return vec4f(vec3(1.0,l.y/500.0,0.5),0.0);
  
 }
 ///////////////////////////////////////////////////////////
