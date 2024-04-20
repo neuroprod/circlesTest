@@ -6,6 +6,11 @@ import {TextureFormat} from "./lib/WebGPUConstants.ts";
 import DepthStencilAttachment from "./lib/textures/DepthStencilAttachment.ts";
 import UI from "./lib/UI/UI.ts";
 import ModelRenderer from "./lib/model/ModelRenderer.ts";
+import Material from "./lib/core/Material.ts";
+import DistanceShader from "./DistanceShader.ts";
+import Blit from "./lib/Blit.ts";
+import BlitDebugShader from "./BlitDebugShader.ts";
+import {Vector2} from "math.gl";
 
 
 export default class CanvasRenderPass extends RenderPass {
@@ -14,6 +19,8 @@ export default class CanvasRenderPass extends RenderPass {
     private canvasColorTarget: RenderTexture;
     private canvasDepthTarget: RenderTexture;
 public modelRenderer:ModelRenderer;
+    private material: Material;
+    private blit: Blit;
 
     constructor(renderer: Renderer) {
 
@@ -32,9 +39,9 @@ public modelRenderer:ModelRenderer;
 
         this.canvasColorAttachment = new ColorAttachment(this.canvasColorTarget, {
             clearValue: {
-                r: 0.0,
-                g: 0.0,
-                b: 0.0,
+                r: 5/255,
+                g: 21/255,
+                b: 40/255,
                 a: 1
             }
         });
@@ -49,12 +56,17 @@ public modelRenderer:ModelRenderer;
         this.depthStencilAttachment = new DepthStencilAttachment(this.canvasDepthTarget);
 
 
+        this.material =new Material(renderer,"debugtMat",new BlitDebugShader(this.renderer,"blitdebug"))
+        this.material.uniforms.setTexture("colorTexture",this.renderer.texturesByLabel["offsetTexture"]);
 
+
+        this.blit =new Blit(this.renderer,"blit",this.material);
 
     }
-
-    onSettingsChange() {
-        super.onSettingsChange();
+update(){
+    this.material.uniforms.setUniform("screenSize",this.renderer.size)
+}
+    onUI(){
 
     }
 
@@ -64,6 +76,9 @@ public modelRenderer:ModelRenderer;
 
 
         this.modelRenderer.draw(this)
+
+        this.blit.draw(this)
+
         UI.drawGPU(this.passEncoder, true)
     }
 
