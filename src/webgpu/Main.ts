@@ -18,7 +18,7 @@ import TextureLoader from "./lib/textures/TextureLoader.ts";
 
 export default class Main{
     numDiv =400;
-    numInstances =500;
+    numInstances =200;
     private canvasManager: CanvasManager;
 
     private renderer: Renderer;
@@ -78,6 +78,7 @@ export default class Main{
                 operation: BlendOperation.Add,
             }
         }
+        this.model.material.depthWrite=false;
         this.model.material.blendModes =[l]
         this.makeInstances();
         this.canvasRenderPass.modelRenderer.addModel(this.model);
@@ -95,7 +96,7 @@ export default class Main{
      //  this.thickness = UI.LFloatSlider("thickness",this.thickness,0,0.01)
         UI.popWindow();
 
-        this.thickness =1/window.innerHeight/2;
+        this.thickness =1/window.innerHeight;
 
         this.model.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
         this.model.material.uniforms.setUniform("thickness",this.thickness)
@@ -114,7 +115,7 @@ export default class Main{
 
 
 
-        let data =new Float32Array( this.model.numInstances*2)
+        let data =new Float32Array( this.model.numInstances*3)
        let byteLength   =data.byteLength
         let index =0;
         let y =0;
@@ -122,8 +123,8 @@ export default class Main{
 
 
             data[index++]=i;
-            data[index++]=0;
-
+            data[index++]=Math.random();
+            data[index++]=Math.random();
 
         }
 

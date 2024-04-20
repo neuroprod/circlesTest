@@ -15,7 +15,7 @@ export default class CircleShader extends Shader{
             this.addAttribute("aPosPrev", ShaderType.vec2);
             this.addAttribute("aPosNext", ShaderType.vec2);
             this.addAttribute("aDir", ShaderType.vec2);
-            this.addAttribute("aInstancePos", ShaderType.vec2,1,"instance");
+            this.addAttribute("aInstancePos", ShaderType.vec3,1,"instance");
         }
         //this.renderer.texturesByLabel["GDepth"]
         this.addUniform("ratio",1)
@@ -38,14 +38,15 @@ struct VertexOutput
 
 
 ${this.getShaderUniforms(0)}
-fn getPos( pos: vec2f,inst:vec2f,dir:vec2f,indexOff:f32)->vec2f
+fn getPos( pos: vec2f,inst:vec3f,dir:vec2f,indexOff:f32)->vec2f
 {
     var posR =pos;
     let p = vec2f(inst.x,dir.y+indexOff);
 
         let uvPos = vec2<i32>(p);
-   posR*= 0.6+ (textureLoad(offsetTexture,  uvPos ,0).x)*0.7 ;
-    posR.x +=inst.x/10000;
+   posR*= 1.0+ (textureLoad(offsetTexture,  uvPos ,0).x)*0.6 ;
+    posR.x +=inst.y/2;
+      posR.y +=inst.x/5000;
     return  posR*vec2(uniforms.ratio,1.0);
 }
 @vertex
@@ -63,6 +64,7 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
     let pos =  posS+normal*uniforms.thickness*aDir.x;
     output.position =vec4(pos.x,pos.y,0,1.0);
   output.l = aDir;
+  
     return output;
 }
 
@@ -70,8 +72,8 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
 @fragment
 fn mainFragment(@location(0) l: vec2f) ->   @location(0) vec4f
 {
- 
-  return vec4f(vec3(1.0,l.y/500.0,0.5),0.0);
+ let a =1.0-abs(l.x);
+  return vec4f(vec3(1.0,l.y/500.0,0.5)*0.6*a,0.0);
  
 }
 ///////////////////////////////////////////////////////////
