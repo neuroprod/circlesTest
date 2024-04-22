@@ -51,7 +51,7 @@ fn getPos( pos: vec2f,inst:vec3f,dir:vec2f,indexOff:f32)->vec2f
 
     let uvPos = vec2<i32>(p);
     posR*= 0.5+ (textureLoad(offsetTexture,  uvPos ,0).x)*1.0 ;
-    posR.x +=inst.y/2;
+    posR.x +=inst.y/4;
     posR.y +=inst.x/5000;
     return  posR*vec2(uniforms.ratio,1.0);
 }
@@ -81,10 +81,10 @@ fn mainFragment(@location(0) l: vec2f) ->  FragOutput
 var output :FragOutput;
     let a =1.0-abs(l.x);
  
-    var f =((l.y+240)%255)/255;
+    var f =((l.y+240)%256)/256;
     f=abs(f*2.0-1.0);
  
-     let uvPos = vec2<i32>(vec2f(f*255)%255);
+     let uvPos = vec2<i32>(vec2f(f*256)%256);
      var color =   textureLoad(colorTexture, uvPos ,0);
      output.color=color*a;
     output.add=vec4(0.2*a);

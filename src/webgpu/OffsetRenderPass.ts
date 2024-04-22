@@ -10,6 +10,7 @@ import DistanceShader from "./DistanceShader.ts";
 import Blit from "./lib/Blit.ts";
 import {Vector2, Vector3, Vector4} from "math.gl";
 import UI from "./lib/UI/UI.ts";
+import BlitCircle from "./BlitCircle.ts";
 
 
 export default class OffsetRenderPass extends RenderPass {
@@ -18,12 +19,9 @@ export default class OffsetRenderPass extends RenderPass {
     private colorTarget: RenderTexture;
 
     public modelRenderer:ModelRenderer;
-    private material: Material;
-    private blit: Blit;
-private pos =new Vector2()
-    private size: number=0.3;
-    private hardness: number=0.2;
-    private alpha: number=1.0;
+    private blitCircle1: BlitCircle;
+    private blitCircle2: BlitCircle;
+    private blitCircle3: BlitCircle;
     constructor(renderer: Renderer) {
 
         super(renderer, "canvasRenderPass");
@@ -49,14 +47,19 @@ private pos =new Vector2()
             }
         });
         this.colorAttachments = [this.canvasColorAttachment];
-        this.material =new Material(renderer,"distMat",new DistanceShader(this.renderer,"distshader"))
 
 
+        this.blitCircle1 = new BlitCircle(this.renderer,0);
+        this.blitCircle1.pos.x =-0.37;
+        this.blitCircle1.pos.y =-0.635;
+        this.blitCircle1.size =0.153;
+        this.blitCircle1.alpha =0.587;
 
-        this.blit =new Blit(this.renderer,"blit",this.material)
-
-
-
+        this.blitCircle2= new BlitCircle(this.renderer,1);
+        this.blitCircle3= new BlitCircle(this.renderer,2);
+        this.blitCircle3.pos.x =0;
+        this.blitCircle3.pos.y =-0.441;
+        this.blitCircle3.size =0.122;
     }
 
 
@@ -64,18 +67,14 @@ private pos =new Vector2()
 
     draw() {
 
-        this.blit.draw(this)
-
+        this.blitCircle1.draw(this)
+        this.blitCircle2.draw(this)
+        this.blitCircle3.draw(this)
     }
 
     onUI() {
-        UI.LVector("pos",this.pos)
-       this.size = UI.LFloatSlider("size",this.size,0,1)
-       this.hardness= UI.LFloatSlider("hardness",this.hardness,0,1)
-        this.alpha= UI.LFloatSlider("alpha",this.alpha,0,1)
-        this.material.uniforms.setUniform("pos",this.pos)
-
-
-        this.material.uniforms.setUniform("size",new Vector4(this.size,(this.size)*this.hardness,this.alpha,1))
+        this.blitCircle1.onUI()
+        this.blitCircle2.onUI()
+        this.blitCircle3.onUI()
     }
 }

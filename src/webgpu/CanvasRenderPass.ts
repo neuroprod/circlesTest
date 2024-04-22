@@ -79,8 +79,9 @@ update(){
     draw() {
 
 
-        this.modelRenderer.draw(this)
+
         this.blitLines.draw(this);
+        this.modelRenderer.draw(this)
         this.blitD.draw(this)
 
         UI.drawGPU(this.passEncoder, true)

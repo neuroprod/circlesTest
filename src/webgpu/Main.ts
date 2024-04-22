@@ -15,6 +15,8 @@ import TextureLoader from "./lib/textures/TextureLoader.ts";
 import OffsetRenderPass from "./OffsetRenderPass.ts";
 import Blend from "./lib/Blend.ts";
 import LineRenderPass from "./LinePass.ts";
+import Quad from "./lib/mesh/Quad.ts";
+import DotShader from "./DotShader.ts";
 
 
 
@@ -37,7 +39,10 @@ export default class Main{
     private texureColor: TextureLoader;
     private offsetRenderPass: OffsetRenderPass;
     private lineRenderPass: LineRenderPass;
-
+    private dotModel: Model;
+    private bufferPosDots: GPUBuffer;
+private offsets:Array<number> =[]
+    private thicknessF: number =2;
     constructor() {
         console.log("setup");
         this.canvas = document.getElementById("webgpuCanvas") as HTMLCanvasElement
@@ -83,10 +88,20 @@ export default class Main{
 
         this.model.material.depthWrite=false;
         this.model.material.blendModes =[Blend.preMultAlpha(),Blend.add()];
-        this.makeInstances();
+        this.makeInstancesLines();
         this.lineRenderPass.modelRenderer.addModel(this.model);
 
 
+        this.dotModel = new Model(this.renderer,"dotModel")
+        this.dotModel.numInstances =256;
+        this.dotModel.mesh =new Quad(this.renderer);
+        this.dotModel.material =new Material(this.renderer,"dotMat", new DotShader(this.renderer,"dotShader"))
+        this.dotModel.material.depthWrite =false;
+        this.dotModel.material.uniforms.setTexture("offsetTexture",this.renderer.texturesByLabel["offsetTexture"]);
+        this.dotModel.material.uniforms.setTexture("colorTexture",this.texureColor)
+        this.dotModel.material.blendModes=[Blend.preMultAlpha()]
+        this.makeInstancesDots();
+        this.canvasRenderPass.modelRenderer.addModel(this.dotModel)
         this.tick()
 
     }
@@ -96,12 +111,12 @@ export default class Main{
         Timer.update()
         UI.pushWindow("Settings");
         UI.floatPrecision =3;
-     //  this.thickness = UI.LFloatSlider("thickness",this.thickness,0,0.01)
+      this.thicknessF = UI.LFloatSlider("LineThickness",  this.thicknessF,1,10)
         this.offsetRenderPass.onUI();
         UI.popWindow();
 
-        this.thickness =1/window.innerHeight*2;
-
+        this.thickness =1/window.innerHeight*  this.thicknessF;
+        this.dotModel.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
         this.model.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
         this.model.material.uniforms.setUniform("thickness",this.thickness)
         this.canvasRenderPass.update()
@@ -118,7 +133,7 @@ export default class Main{
 
     }
 
-    private makeInstances() {
+    private makeInstancesLines() {
 
 
 
@@ -128,11 +143,11 @@ export default class Main{
         let y =0;
         for(let i=0;i<this.model.numInstances;i++ ){
 
-
+            let offset  = i/256+Math.random()*0.03;
             data[index++]=i;
-            data[index++]=i/256+Math.random()*0.01;
+            data[index++]=offset;
             data[index++]=Math.random();
-
+            this.offsets.push(offset);
         }
 
 
@@ -149,5 +164,38 @@ export default class Main{
         this.bufferPosA.label = "instanceBufferA" ;
         this.model.addBuffer("aInstancePos",this.bufferPosA)
     }
+
+    private makeInstancesDots() {
+
+
+
+        let data =new Float32Array( this.dotModel.numInstances*4)
+        let byteLength   =data.byteLength
+        let index =0;
+        let y =0;
+        for(let i=0;i<this.model.numInstances;i++ ){
+
+            let r =i%256;
+            data[index++]=r;
+            data[index++]=this.offsets[r];
+            data[index++]=Math.random();
+            data[index++]=Math.random();
+        }
+
+
+
+        this.bufferPosDots= this.renderer.device.createBuffer({
+            size: data.byteLength,
+            usage: GPUBufferUsage.VERTEX|GPUBufferUsage.STORAGE,
+            mappedAtCreation: true,
+        });
+        const dst = new Float32Array(this.bufferPosDots.getMappedRange());
+        dst.set(data);
+
+        this.bufferPosDots.unmap();
+        this.bufferPosDots.label = "instanceBufferDots" ;
+        this.dotModel.addBuffer("aInstancePos",this.bufferPosDots)
+    }
+
 
 }

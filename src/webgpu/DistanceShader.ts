@@ -51,6 +51,9 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
     return output;
 }
 
+fn rand(n:vec2f)->f32 { 
+return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
 
 @fragment
 fn mainFragment(@location(0) uv: vec2f) ->   @location(0) vec4f
@@ -58,9 +61,10 @@ fn mainFragment(@location(0) uv: vec2f) ->   @location(0) vec4f
 var  uvV=uv-uniforms.pos;
 uvV.y = uvV.y%1.0;
 uvV =uvV-0.5;
-
+let r = rand(vec2(uv.x,0.1))*0.1;
+let r2 = rand(vec2(r,uv.x))*0.1;
 var l =length(uvV);
-let s=1.0-smoothstep(uniforms.size.y,uniforms.size.x,l);
+let s=1.0-smoothstep(uniforms.size.y-r,uniforms.size.x-r2,l);
      var color =   vec4(s*uniforms.size.z,0.0,0.0,1.0);
     
   return  color;
