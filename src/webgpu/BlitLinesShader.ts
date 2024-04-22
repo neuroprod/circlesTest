@@ -52,7 +52,7 @@ fn mainFragment(@location(0) uv: vec2f) ->   @location(0) vec4f
     let textureSize =vec2<f32>( textureDimensions(colorTexture));
     let uvPos = vec2<i32>(floor(uv*textureSize));
 
-     var color =  textureLoad(colorTexture,  uvPos ,0) + vec4(textureLoad(addTexture,  uvPos ,0).x-0.3)*0.5;
+     var color =  textureLoad(colorTexture,  uvPos ,0) + vec4(max(textureLoad(addTexture,  uvPos ,0).x-0.1,0.0))*0.5;
     color.a =1.0;
   return  color;
 
