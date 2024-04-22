@@ -14,7 +14,7 @@ export default class CircleMesh{
         for(let i=0;i<numDiv;i++){
 
             let angle = i* angleStep;
-            this.basePoint.push(new Vector2(Math.sin(angle)*0.7,Math.cos(angle)*0.7))
+            this.basePoint.push(new Vector2(Math.sin(angle),Math.cos(angle)))
         }
         const dir = [];
         const vertices = [];

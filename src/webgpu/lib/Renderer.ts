@@ -161,11 +161,12 @@ export default class Renderer {
             this.size.x =this.width;
             this.size.y =this.height;
             for (let t of this.scaleToCanvasTextures) {
-                if(t.label=="canvasColor" || t.label=="canvasDepth"){
+                t.resize(this.width, this.height);
+               /* if(t.label=="canvasColor" || t.label=="canvasDepth"){
                     t.resize(this.width, this.height);
                 }else{
                     t.resize(this.width/this.pixelRatio, this.height/this.pixelRatio);
-                }
+                }*/
             }
 
             for (let t of this.scaleToCanvasTextures) {

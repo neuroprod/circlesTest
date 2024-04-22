@@ -11,6 +11,7 @@ import DistanceShader from "./DistanceShader.ts";
 import Blit from "./lib/Blit.ts";
 import BlitDebugShader from "./BlitDebugShader.ts";
 import {Vector2} from "math.gl";
+import BlitLinesShader from "./BlitLinesShader.ts";
 
 
 export default class CanvasRenderPass extends RenderPass {
@@ -19,9 +20,10 @@ export default class CanvasRenderPass extends RenderPass {
     private canvasColorTarget: RenderTexture;
     private canvasDepthTarget: RenderTexture;
 public modelRenderer:ModelRenderer;
-    private material: Material;
-    private blit: Blit;
-
+    private materialD: Material;
+    private blitD: Blit;
+    private materialLines: Material;
+    private blitLines: Blit;
     constructor(renderer: Renderer) {
 
         super(renderer, "canvasRenderPass");
@@ -55,16 +57,18 @@ public modelRenderer:ModelRenderer;
         });
         this.depthStencilAttachment = new DepthStencilAttachment(this.canvasDepthTarget);
 
+        this.materialLines =new Material(renderer,"blitLinesMat",new BlitLinesShader(this.renderer,"blitLines"))
+        this.materialLines.uniforms.setTexture("colorTexture",this.renderer.texturesByLabel["lineColor"]);
+        this.materialLines.uniforms.setTexture("addTexture",this.renderer.texturesByLabel["lineAdd"]);
+        this.blitLines =new Blit(this.renderer,"blit",this.materialLines);
 
-        this.material =new Material(renderer,"debugtMat",new BlitDebugShader(this.renderer,"blitdebug"))
-        this.material.uniforms.setTexture("colorTexture",this.renderer.texturesByLabel["offsetTexture"]);
-
-
-        this.blit =new Blit(this.renderer,"blit",this.material);
+        this.materialD =new Material(renderer,"debugtMat",new BlitDebugShader(this.renderer,"blitdebug"))
+        this.materialD.uniforms.setTexture("colorTexture",this.renderer.texturesByLabel["offsetTexture"]);
+        this.blitD =new Blit(this.renderer,"blit",this.materialD);
 
     }
 update(){
-    this.material.uniforms.setUniform("screenSize",this.renderer.size)
+    this.materialD.uniforms.setUniform("screenSize",this.renderer.size)
 }
     onUI(){
 
@@ -76,8 +80,8 @@ update(){
 
 
         this.modelRenderer.draw(this)
-
-        this.blit.draw(this)
+        this.blitLines.draw(this);
+        this.blitD.draw(this)
 
         UI.drawGPU(this.passEncoder, true)
     }

@@ -36,7 +36,12 @@ struct VertexOutput
   
 }
 
+struct FragOutput {
+  @location(0) color : vec4f,
+  @location(1) add : vec4f,
 
+   
+}
 
 ${this.getShaderUniforms(0)}
 fn getPos( pos: vec2f,inst:vec3f,dir:vec2f,indexOff:f32)->vec2f
@@ -44,10 +49,10 @@ fn getPos( pos: vec2f,inst:vec3f,dir:vec2f,indexOff:f32)->vec2f
     var posR =pos;
     let p = vec2f(inst.x,dir.y+indexOff);
 
-        let uvPos = vec2<i32>(p);
-   posR*= 1.0+ (textureLoad(offsetTexture,  uvPos ,0).x)*2.0 ;
+    let uvPos = vec2<i32>(p);
+    posR*= 0.5+ (textureLoad(offsetTexture,  uvPos ,0).x)*1.0 ;
     posR.x +=inst.y/2;
-      posR.y +=inst.x/5000;
+    posR.y +=inst.x/5000;
     return  posR*vec2(uniforms.ratio,1.0);
 }
 @vertex
@@ -64,24 +69,26 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
     
     let pos =  posS+normal*uniforms.thickness*aDir.x;
     output.position =vec4(pos.x,pos.y,0,1.0);
-  output.l = aDir;
+    output.l = aDir;
   
     return output;
 }
 
 
 @fragment
-fn mainFragment(@location(0) l: vec2f) ->   @location(0) vec4f
+fn mainFragment(@location(0) l: vec2f) ->  FragOutput
 {
- let a =1.0-abs(l.x);
+var output :FragOutput;
+    let a =1.0-abs(l.x);
  
- var f =((l.y+240)%255)/255;
- f=abs(f*2.0-1.0);
+    var f =((l.y+240)%255)/255;
+    f=abs(f*2.0-1.0);
  
      let uvPos = vec2<i32>(vec2f(f*255)%255);
      var color =   textureLoad(colorTexture, uvPos ,0);
-     color=color*a;
-  return  color;
+     output.color=color*a;
+    output.add=vec4(0.2*a);
+  return output;
 
 }
 ///////////////////////////////////////////////////////////

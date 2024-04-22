@@ -10,9 +10,11 @@ import Material from "./lib/core/Material.ts";
 import Timer from "./lib/Timer.ts";
 import CircleMesh from "./CircleMesh.ts";
 import CircleShader from "./CircleShader.ts";
-import {BlendFactor, BlendOperation} from "./lib/WebGPUConstants.ts";
+
 import TextureLoader from "./lib/textures/TextureLoader.ts";
 import OffsetRenderPass from "./OffsetRenderPass.ts";
+import Blend from "./lib/Blend.ts";
+import LineRenderPass from "./LinePass.ts";
 
 
 
@@ -34,6 +36,7 @@ export default class Main{
     private texure: TextureLoader;
     private texureColor: TextureLoader;
     private offsetRenderPass: OffsetRenderPass;
+    private lineRenderPass: LineRenderPass;
 
     constructor() {
         console.log("setup");
@@ -42,7 +45,7 @@ export default class Main{
         this.renderer = new Renderer()
 
         this.renderer.setup(this.canvas).then(() => {
-            this.setup();
+            setTimeout(this.setup.bind(this),60);
         }).catch(() => {
            console.error("noWebgpu")
         })
@@ -52,15 +55,23 @@ export default class Main{
     setup() {
 
         this.offsetRenderPass =new OffsetRenderPass(this.renderer)
+        this.lineRenderPass  =new LineRenderPass(this.renderer)
+
         this.canvasRenderPass = new CanvasRenderPass(this.renderer);
         this.renderer.setCanvasColorAttachment(this.canvasRenderPass.canvasColorAttachment)
+
+
+
+
 
         UI.setWebGPU(this.renderer)
 
         this.texure =new TextureLoader(this.renderer,"noiseTexture.png",{})
         this.texureColor =new TextureLoader(this.renderer,"gradient.png",{})
         this.camera =new Camera(this.renderer,"mainCamera")
+
         this.canvasRenderPass.modelRenderer.camera =this.camera
+
         this.circleMesh =new CircleMesh(this.renderer,this.numDiv);
         this.model = new Model(this.renderer,"partModel")
         this.model.mesh =this.circleMesh.mesh;
@@ -69,23 +80,11 @@ export default class Main{
         this.model.material.uniforms.setTexture("offsetTexture",this.renderer.texturesByLabel["offsetTexture"]);
         this.model.material.uniforms.setTexture("colorTexture",this.texureColor)
         this.model.numInstances =this.numInstances;
-        let l: GPUBlendState = {
 
-            color: {
-                srcFactor: BlendFactor.One,
-                dstFactor: BlendFactor.OneMinusSrcAlpha,
-                operation: BlendOperation.Add,
-            },
-            alpha: {
-                srcFactor: BlendFactor.One,
-                dstFactor: BlendFactor.OneMinusSrcAlpha,
-                operation: BlendOperation.Add,
-            }
-        }
         this.model.material.depthWrite=false;
-      this.model.material.blendModes =[l]
+        this.model.material.blendModes =[Blend.preMultAlpha(),Blend.add()];
         this.makeInstances();
-        this.canvasRenderPass.modelRenderer.addModel(this.model);
+        this.lineRenderPass.modelRenderer.addModel(this.model);
 
 
         this.tick()
@@ -101,7 +100,7 @@ export default class Main{
         this.offsetRenderPass.onUI();
         UI.popWindow();
 
-        this.thickness =1/window.innerHeight;
+        this.thickness =1/window.innerHeight*2;
 
         this.model.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
         this.model.material.uniforms.setUniform("thickness",this.thickness)
@@ -113,6 +112,8 @@ export default class Main{
     onDraw(){
 
         this.offsetRenderPass.add();
+        this.lineRenderPass.add();
+
         this.canvasRenderPass.add();
 
     }
