@@ -87,7 +87,7 @@ var output :FragOutput;
      let uvPos = vec2<i32>(vec2f(f*256)%256);
      var color =   textureLoad(colorTexture, uvPos ,0);
      output.color=color*a;
-    output.add=vec4(0.2*a);
+    output.add=vec4(0.1*a);
   return output;
 
 }
