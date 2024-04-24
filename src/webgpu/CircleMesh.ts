@@ -11,7 +11,7 @@ export default class CircleMesh{
         let angleStep = Math.PI*2/this.numDiv;
 
 
-        for(let i=0;i<numDiv;i++){
+        for(let i=0;i<=numDiv;i++){
 
             let angle = i* angleStep;
             this.basePoint.push(new Vector2(Math.sin(angle),Math.cos(angle)))
@@ -20,7 +20,7 @@ export default class CircleMesh{
         const vertices = [];
         const verticesPrev = [];
         const verticesNext = [];
-        for(let i=0;i<numDiv;i++){
+        for(let i=0;i<=numDiv;i++){
             dir.push(1,i,-1,i);
 
             let v =  this.basePoint[this.getIndex(i)]
@@ -38,13 +38,13 @@ export default class CircleMesh{
 
         const indices = [];
         let indexCount =0
-        for(let i=0;i<numDiv-1;i++){
+        for(let i=0;i<numDiv;i++){
             indices.push(indexCount,indexCount+2,indexCount+1)
             indices.push(indexCount+1,indexCount+2,indexCount+3)
             indexCount+=2;
         }
-        indices.push(indexCount,0,indexCount+1)
-        indices.push(indexCount+1,0,1)
+       // indices.push(indexCount,0,indexCount+1)
+        //indices.push(indexCount+1,0,1)
 
        this.mesh =new Mesh(renderer,"circleMesh")
         this.mesh.setAttribute("aDir",new Float32Array(dir));

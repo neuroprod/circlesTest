@@ -22,7 +22,7 @@ export default class OffsetRenderPass extends RenderPass {
     private blitCircle1: BlitCircle;
     private blitCircle2: BlitCircle;
     private blitCircle3: BlitCircle;
-    constructor(renderer: Renderer) {
+    constructor(renderer: Renderer,numInstances:number, numDivisions:number) {
 
         super(renderer, "canvasRenderPass");
 
@@ -32,8 +32,8 @@ export default class OffsetRenderPass extends RenderPass {
         this.colorTarget = new RenderTexture(renderer, "offsetTexture", {
             format: TextureFormat.R16Float,
             sampleCount: this.sampleCount,
-            width:256,
-            height:256,
+            width:numInstances,
+            height:numDivisions,
 
             usage: GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.TEXTURE_BINDING
         });

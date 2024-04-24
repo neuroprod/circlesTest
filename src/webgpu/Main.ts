@@ -22,8 +22,9 @@ import DotShader from "./DotShader.ts";
 
 
 export default class Main{
-    numDiv =256;
+    numDiv =512;
     numInstances =256;
+    numDots: number= 1000;
     private canvasManager: CanvasManager;
 
     private renderer: Renderer;
@@ -43,6 +44,7 @@ export default class Main{
     private bufferPosDots: GPUBuffer;
 private offsets:Array<number> =[]
     private thicknessF: number =2;
+
     constructor() {
         console.log("setup");
         this.canvas = document.getElementById("webgpuCanvas") as HTMLCanvasElement
@@ -59,7 +61,7 @@ private offsets:Array<number> =[]
 
     setup() {
 
-        this.offsetRenderPass =new OffsetRenderPass(this.renderer)
+        this.offsetRenderPass =new OffsetRenderPass(this.renderer,this.numInstances,this.numDiv)
         this.lineRenderPass  =new LineRenderPass(this.renderer)
 
         this.canvasRenderPass = new CanvasRenderPass(this.renderer);
@@ -84,8 +86,8 @@ private offsets:Array<number> =[]
         this.model.material.cullMode="none";
         this.model.material.uniforms.setTexture("offsetTexture",this.renderer.texturesByLabel["offsetTexture"]);
         this.model.material.uniforms.setTexture("colorTexture",this.texureColor)
-        this.model.numInstances =this.numInstances;
 
+        this.model.numInstances =this.numInstances;
         this.model.material.depthWrite=false;
         this.model.material.blendModes =[Blend.preMultAlpha(),Blend.add()];
         this.makeInstancesLines();
@@ -93,7 +95,7 @@ private offsets:Array<number> =[]
 
 
         this.dotModel = new Model(this.renderer,"dotModel")
-        this.dotModel.numInstances =256;
+        this.dotModel.numInstances =this.numDots;
         this.dotModel.mesh =new Quad(this.renderer);
         this.dotModel.material =new Material(this.renderer,"dotMat", new DotShader(this.renderer,"dotShader"))
         this.dotModel.material.depthWrite =false;
@@ -117,6 +119,7 @@ private offsets:Array<number> =[]
 
         this.thickness =1/window.innerHeight*  this.thicknessF;
         this.dotModel.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
+        this.dotModel.material.uniforms.setUniform("time",  Timer.time*0.1)
         this.model.material.uniforms.setUniform("ratio",  1/this.renderer.ratio)
         this.model.material.uniforms.setUniform("thickness",this.thickness)
         this.canvasRenderPass.update()
@@ -143,7 +146,7 @@ private offsets:Array<number> =[]
         let y =0;
         for(let i=0;i<this.model.numInstances;i++ ){
 
-            let offset  = i/256+Math.random()*0.03;
+            let offset  = i/this.numInstances+Math.random()*0.03;
             data[index++]=i;
             data[index++]=offset;
             data[index++]=Math.random();
@@ -173,12 +176,12 @@ private offsets:Array<number> =[]
         let byteLength   =data.byteLength
         let index =0;
         let y =0;
-        for(let i=0;i<this.model.numInstances;i++ ){
+        for(let i=0;i<this.dotModel.numInstances;i++ ){
 
-            let r =i%256;
+            let r =i%this.numInstances;
             data[index++]=r;
             data[index++]=this.offsets[r];
-            data[index++]=Math.random();
+            data[index++]=Math.random()*0.5+0.5;
             data[index++]=Math.random();
         }
 

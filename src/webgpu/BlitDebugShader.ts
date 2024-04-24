@@ -14,7 +14,7 @@ export default class BlitDebugShader extends Shader{
             this.addAttribute("aUV0", ShaderType.vec2);
 
         }
-        this.addUniform("size",new Vector2(256,256))
+        this.addUniform("size",new Vector2(256,512))
         this.addUniform("screenSize",new Vector2(256,256))
         this.addTexture("colorTexture",DefaultTextures.getWhite(this.renderer))
 

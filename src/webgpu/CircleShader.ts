@@ -20,9 +20,10 @@ export default class CircleShader extends Shader{
         //this.renderer.texturesByLabel["GDepth"]
         this.addUniform("ratio",1)
         this.addUniform("thickness",0.01)
+        this.addUniform("numDiv",512)
         this.addTexture("offsetTexture",DefaultTextures.getWhite(this.renderer),"float",TextureDimension.TwoD,GPUShaderStage.VERTEX)
         this.addTexture("colorTexture",DefaultTextures.getWhite(this.renderer))
-
+        this.addSampler("mySampler",GPUShaderStage.FRAGMENT,"mirror-repeat");
 
     }
     getShaderCode(): string {
@@ -81,11 +82,10 @@ fn mainFragment(@location(0) l: vec2f) ->  FragOutput
 var output :FragOutput;
     let a =1.0-abs(l.x);
  
-    var f =((l.y+240)%256)/256;
-    f=abs(f*2.0-1.0);
+    var f =l.y/uniforms.numDiv;
  
-     let uvPos = vec2<i32>(vec2f(f*256)%256);
-     var color =   textureLoad(colorTexture, uvPos ,0);
+     let uvPos =vec2f(f*2.0 +1.0);
+     var color =textureSample(colorTexture, mySampler,  uvPos);
      output.color=color*a;
     output.add=vec4(0.1*a);
   return output;

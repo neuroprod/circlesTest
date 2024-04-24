@@ -18,9 +18,10 @@ export default class DotShader extends Shader{
         }
         //this.renderer.texturesByLabel["GDepth"]
         this.addUniform("ratio",1)
+        this.addUniform("time",1)
         this.addTexture("offsetTexture",DefaultTextures.getWhite(this.renderer),"float",TextureDimension.TwoD,GPUShaderStage.VERTEX)
         this.addTexture("colorTexture",DefaultTextures.getWhite(this.renderer))
-
+        this.addSampler("mySampler",GPUShaderStage.FRAGMENT,"mirror-repeat");
     }
     getShaderCode(): string {
         return /* wgsl */ `
@@ -37,11 +38,11 @@ struct VertexOutput
 
 
 ${this.getShaderUniforms(0)}
-fn getPos( pos: vec2f,inst:vec4f)->vec2f
+fn getPos( pos: vec2f,inst:vec4f,angleIn:f32)->vec2f
 {
     var posR =pos;
-    
-    let p =vec2f(inst.x,floor(inst.w*256.0));
+    let angle  = ((angleIn)*512.0)%512;
+    let p =vec2f(inst.x,floor(angle));
      let uvPos = vec2<i32>(p);
     
  posR*= 0.5+ (textureLoad(offsetTexture,  uvPos ,0).x)*1.0;
@@ -54,16 +55,16 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
 {
 
     var output:VertexOutput;
-    
-    let angle  = aInstancePos.w*3.1415*2;
+    let offsetAngle = (aInstancePos.w+uniforms.time*aInstancePos.z);
+    let angle  = (offsetAngle)*3.1415*2;
     let circlePos = vec2(sin(angle),cos(angle));
-    var offset = getPos(circlePos,aInstancePos);
+    var offset = getPos(circlePos,aInstancePos,offsetAngle);
    var pos = aPos.xy*0.004;
    pos += offset;
   
     output.position =vec4(pos.x* uniforms.ratio,pos.y,0,1.0);
     output.uv = aUV0;
-  output.uvc = aInstancePos.w;
+  output.uvc = offsetAngle;
     return output;
 }
 
@@ -72,11 +73,10 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
 fn mainFragment(@location(0) uv: vec2f,@location(1) uvc: f32) ->    @location(0) vec4f
 {
 let a  =1.0-smoothstep(0.9,1.0,length(uv-vec2(0.5))*2.0);
-  var f =(((uvc*255)+240)%255)/255;
-    f=abs(f*2.0-1.0);
+    
  
-     let uvPos = vec2<i32>(vec2f(f*255)%255);
-     var color =   textureLoad(colorTexture, uvPos ,0);
+     let uvPos =vec2f(uvc*2.0 +1.0);
+     var color =textureSample(colorTexture, mySampler,  uvPos);
 color+=vec4(0.5,0.5,0.5,0.0);
 color*=a;
   return color;
