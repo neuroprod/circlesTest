@@ -7,6 +7,7 @@ import Blit from "./lib/Blit.ts";
 import OffsetRenderPass from "./OffsetRenderPass.ts";
 import RenderPass from "./lib/core/RenderPass.ts";
 import Blend from "./lib/Blend.ts";
+import Timer from "./lib/Timer.ts";
 
 export default class BlitCircle{
 
@@ -47,6 +48,7 @@ export default class BlitCircle{
 
         this.material.uniforms.setUniform("sizeX",new Vector4(this.sizeX,this.softX,this.alpha,1))
         this.material.uniforms.setUniform("sizeY",new Vector4(this.sizeY,this.softY,this.alpha,1))
+        this.material.uniforms.setUniform("time",Timer.time)
         UI.popID();
     }
 

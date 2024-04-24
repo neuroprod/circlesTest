@@ -59,7 +59,7 @@ fn mainVertex( ${this.getShaderAttributes()} ) -> VertexOutput
     let angle  = (offsetAngle)*3.1415*2;
     let circlePos = vec2(sin(angle),cos(angle));
     var offset = getPos(circlePos,aInstancePos,offsetAngle);
-   var pos = aPos.xy*0.004;
+   var pos = aPos.xy*0.005;
    pos += offset;
   
     output.position =vec4(pos.x* uniforms.ratio,pos.y,0,1.0);
