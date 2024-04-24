@@ -14,11 +14,17 @@ export default class BlitCircle{
     private renderer: Renderer;
     private blit: Blit;
 
-    pos =new Vector2(0.000,-0.149)
-     size: number=0.3;
-    hardness: number=0.2;
+    pos =new Vector2(0.000,0)
+
+
    alpha: number=0.3;
+    private sizeX: number=0.2;
+    private sizeY: number=0.2;
+    private softX: number=0.2;
+    private softY: number=0.2;
+
     private name: string;
+
     constructor(renderer:Renderer,index:number) {
         this.renderer = renderer;
         this.material =new Material(renderer,"distMat",new DistanceShader(this.renderer,"distshader"))
@@ -31,13 +37,16 @@ export default class BlitCircle{
         UI.pushID(this.name);
         UI.separator(this.name);
         UI.LVector("pos",this.pos)
-        this.size = UI.LFloatSlider("size",this.size,0,1)
-        this.hardness= UI.LFloatSlider("hardness",this.hardness,0,1)
+        this.sizeX= UI.LFloatSlider("sizeX",this.sizeX,0,1)
+        this.softX= UI.LFloatSlider("softX",this.softX,0,1)
+        this.sizeY= UI.LFloatSlider("sizeY",this.sizeY,0,1)
+        this.softY= UI.LFloatSlider("softY",this.softY,0,1)
         this.alpha= UI.LFloatSlider("alpha",this.alpha,0,1)
         this.material.uniforms.setUniform("pos",this.pos)
 
 
-        this.material.uniforms.setUniform("size",new Vector4(this.size,(this.size)*this.hardness,this.alpha,1))
+        this.material.uniforms.setUniform("sizeX",new Vector4(this.sizeX,this.softX,this.alpha,1))
+        this.material.uniforms.setUniform("sizeY",new Vector4(this.sizeY,this.softY,this.alpha,1))
         UI.popID();
     }
 

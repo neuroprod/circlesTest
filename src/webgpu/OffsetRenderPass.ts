@@ -30,17 +30,17 @@ export default class OffsetRenderPass extends RenderPass {
 
 
         this.colorTarget = new RenderTexture(renderer, "offsetTexture", {
-            format: TextureFormat.R16Float,
+            format: TextureFormat.RG16Float,
             sampleCount: this.sampleCount,
-            width:numInstances,
-            height:numDivisions,
+            width: numInstances,
+            height: numDivisions,
 
-            usage: GPUTextureUsage.RENDER_ATTACHMENT|GPUTextureUsage.TEXTURE_BINDING
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING
         });
         this.colorTarget.make();
         this.canvasColorAttachment = new ColorAttachment(this.colorTarget, {
             clearValue: {
-                r:0.0,
+                r: 0.0,
                 g: 0,
                 b: 0,
                 a: 1
@@ -49,32 +49,22 @@ export default class OffsetRenderPass extends RenderPass {
         this.colorAttachments = [this.canvasColorAttachment];
 
 
-        this.blitCircle1 = new BlitCircle(this.renderer,0);
-        this.blitCircle1.pos.x =-0.37;
-        this.blitCircle1.pos.y =-0.635;
-        this.blitCircle1.size =0.153;
-        this.blitCircle1.alpha =0.587;
+        this.blitCircle1 = new BlitCircle(this.renderer, 0);
+        this.blitCircle1.pos.x = 0;
+        this.blitCircle1.pos.y =0;
 
-        this.blitCircle2= new BlitCircle(this.renderer,1);
-        this.blitCircle3= new BlitCircle(this.renderer,2);
-        this.blitCircle3.pos.x =0;
-        this.blitCircle3.pos.y =-0.441;
-        this.blitCircle3.size =0.122;
+
+
     }
-
-
-
 
     draw() {
 
         this.blitCircle1.draw(this)
-        this.blitCircle2.draw(this)
-        this.blitCircle3.draw(this)
+
     }
 
     onUI() {
         this.blitCircle1.onUI()
-        this.blitCircle2.onUI()
-        this.blitCircle3.onUI()
+
     }
 }

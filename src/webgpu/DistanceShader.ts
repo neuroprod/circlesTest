@@ -17,7 +17,8 @@ export default class DistanceShader extends Shader{
 
         }
         //this.renderer.texturesByLabel["GDepth"]
-        this.addUniform("size",new Vector4(0.5,1,1,1))
+        this.addUniform("sizeY",new Vector4(0.5,1,1,1))
+        this.addUniform("sizeX",new Vector4(0.5,1,1,1))
         this.addUniform("pos",new Vector2(0.5,0.5))
 
 
@@ -61,11 +62,14 @@ fn mainFragment(@location(0) uv: vec2f) ->   @location(0) vec4f
 var  uvV=uv-uniforms.pos;
 uvV.y = uvV.y%1.0;
 uvV =uvV-0.5;
-let r = rand(vec2(uv.x,0.1))*0.1;
-let r2 = rand(vec2(r,uv.x))*0.1;
-var l =length(uvV);
-let s=1.0-smoothstep(uniforms.size.y-r,uniforms.size.x-r2,l);
-     var color =   vec4(s*uniforms.size.z,0.0,0.0,1.0);
+uvV =uvV%1.0;
+
+let x =1.0- smoothstep(uniforms.sizeX.x-uniforms.sizeX.x*uniforms.sizeX.y,uniforms.sizeX.x,abs(uvV.x));
+let y =1.0-smoothstep(uniforms.sizeY.x-uniforms.sizeY.x*uniforms.sizeY.y,uniforms.sizeY.x,abs(uvV.y));
+//let r = rand(vec2(uv.x,0.1))*0.1;
+//let r2 = rand(vec2(r,uv.x))*0.1;
+
+     var color =   vec4(x*y*uniforms.sizeX.z,0.0,0.0,1.0);
     
   return  color;
 
